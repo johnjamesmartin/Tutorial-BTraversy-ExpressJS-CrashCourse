@@ -1,0 +1,20 @@
+/* Imports: */
+
+var express = require('express');
+var bodyParser =  require('body-parser');
+var path = require('path');
+
+
+var app = express();
+
+
+/* GET root route: */
+
+app.get('/', function(req, res) {
+    res.send('Hello world');
+});
+
+
+app.listen(3000, function() {
+    console.log('Server started on port 3000');
+});
