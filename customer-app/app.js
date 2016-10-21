@@ -4,7 +4,9 @@ var express = require('express');
 var bodyParser =  require('body-parser');
 var path = require('path');
 var expressValidator = require('express-validator');
-
+var mongojs = require('mongojs');
+var db = mongojs('customerapp', ['users']);
+var ObjectId = mongojs.ObjectId;
 
 var app = express();
 
@@ -47,57 +49,36 @@ app.use(function(req, res, next) {
 
 app.use(expressValidator({
   errorFormatter: function(param, msg, value) {
-      var namespace = param.split('.')
-      , root    = namespace.shift()
-      , formParam = root;
+      var namespace = param.split('.');
+      var root = namespace.shift();
+      var formParam = root;
 
     while(namespace.length) {
       formParam += '[' + namespace.shift() + ']';
     }
     return {
-      param : formParam,
-      msg   : msg,
-      value : value
+      param: formParam,
+      msg: msg,
+      value: value
     };
   }
 }));
 
 
-/* Users array: */
-
-var users = [
-    {
-        id: 1,
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'johndoe@gmail.com'
-    },
-    {
-        id: 2,
-        first_name: 'Bob',
-        last_name: 'Smith',
-        email: 'bobsmith@gmail.com'
-    },
-    {
-        id: 3,
-        first_name: 'Jill',
-        last_name: 'Jackson',
-        email: 'jilljackson@gmail.com'
-    }
-]
-
-
-/* GET root route: */
+/* GET users: */
 
 app.get('/', function(req, res) {
-    res.render('index', {
-        title: 'customers',
-        users: users
+    db.users.find(function(err, docs) {
+        console.log(docs);
+        res.render('index', {
+            title: 'customers',
+            users: docs
+        });
     });
 });
 
 
-/* POST users/add: */
+/* POST users: */
 
 app.post('/users/add', function(req, res) {
     req.checkBody('first_name', 'First name is required').notEmpty();
@@ -118,8 +99,28 @@ app.post('/users/add', function(req, res) {
             last_name: req.body.last_name,
             email: req.body.email
         };
-        console.log('Success');
+        db.users.insert(newUser, function(err, result) {
+            if (err) {
+                console.log('Insertion error: ' + err);
+            } else {
+                res.redirect('/');
+            }
+        });
     }
+});
+
+
+/* DELETE users: */
+
+app.delete('/users/delete/:id', function(req, res) {
+    db.users.remove({_id: ObjectId(req.params.id)}, function(err, result) {
+        if (err) {
+            console.log('Deletion error: ' + err);
+        } else {
+            res.redirect('/');
+            console.log('works')
+        }
+    });
 });
 
 

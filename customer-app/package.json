@@ -10,7 +10,8 @@
     "body-parser": "*",
     "ejs": "^2.5.2",
     "express": "*",
-    "express-validator": "^2.20.10"
+    "express-validator": "^2.20.10",
+    "mongojs": "^2.4.0"
   },
   "author": "John",
   "license": "ISC"
